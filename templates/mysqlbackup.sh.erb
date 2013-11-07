@@ -19,7 +19,7 @@ MYSQLDUMP="mysqldump --defaults-file=${DEFAULTS} ${MYSQLDUMPOPS}";
 MYSQL="mysql --defaults-file=${DEFAULTS} ${MYSQLDUMPOPS}"
 <% else -%>
 MYSQLDUMP="mysqldump -u${USER} -p${PASS} ${MYSQLDUMPOPS}";
-MYSQLDUMP="mysql -u${USER} -p${PASS} ${MYSQLDUMPOPS}";
+MYSQLDUMP="mysql -u${USER} -p${PASS}";
 <% end -%>
 DIR=<%= @backupdir %>
 ROTATE=<%= [ Integer(@backuprotate) - 1, 0 ].max %>

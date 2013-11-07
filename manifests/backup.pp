@@ -41,12 +41,12 @@ class mysql::backup (
   $user_provided = $backupuser != 'UNSET' and $backuppassword != 'UNSET';
 
 
-  if (!$defaults_provided and !$user_provided) {
-    fail("Either provided a path to a defaults file or a username and password");
+  if !$defaults_provided and !$user_provided {
+    fail("Either provided a path to a defaults file or a username and password")
   }
 
 
-  if ($user_provided) {
+  if $user_provided {
     database_user { "${backupuser}@localhost":
       ensure        => $ensure,
       password_hash => mysql_password($backuppassword),

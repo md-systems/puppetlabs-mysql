@@ -16,7 +16,7 @@ DEFAULTS=<%= @defaults %>
 MYSQLDUMPOPS="--opt --flush-logs --single-transaction"
 <% if @defaults_provided -%>
 MYSQLDUMP="mysqldump --defaults-file=${DEFAULTS} ${MYSQLDUMPOPS}";
-MYSQL="mysql --defaults-file=${DEFAULTS} ${MYSQLDUMPOPS}"
+MYSQL="mysql --defaults-file=${DEFAULTS}"
 <% else -%>
 MYSQLDUMP="mysqldump -u${USER} -p${PASS} ${MYSQLDUMPOPS}";
 MYSQLDUMP="mysql -u${USER} -p${PASS}";

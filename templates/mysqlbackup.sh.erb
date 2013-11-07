@@ -44,7 +44,7 @@ cleanup
 databases=`$MYSQL -s -e "SHOW DATABASES;" | sed -e 1d`
 
 for dbname in $databases; do
- outfile=${DIR}/${PREFIX}${dbname}`date +%Y%m%d-%H%M%S`.sql<% if @backupcompress %>.bz2<% end  %>
+ outfile=${DIR}/${PREFIX}${dbname}_`date +%Y%m%d-%H%M%S`.sql<% if @backupcompress %>.bz2<% end  %>
  $MYSQLDUMP $dbname <% if @backupcompress %>| bzcat -zc <% end %>> $outfile
  chmod 700 $outfile
 done

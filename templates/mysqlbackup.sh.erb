@@ -12,6 +12,15 @@
 
 USER=<%= @backupuser %>
 PASS=<%= @backuppassword %>
+DEFAULTS=<%= @defaults %>
+MYSQLDUMPOPS="--opt --flush-logs --single-transaction"
+<% if @defaults_provided -%>
+MYSQLDUMP="mysqldump --defaults-file=${DEFAULTS} ${MYSQLDUMPOPS}";
+MYSQL="mysql --defaults-file=${DEFAULTS} ${MYSQLDUMPOPS}"
+<% else -%>
+MYSQLDUMP="mysqldump -u${USER} -p${PASS} ${MYSQLDUMPOPS}";
+MYSQLDUMP="mysql -u${USER} -p${PASS} ${MYSQLDUMPOPS}";
+<% end -%>
 DIR=<%= @backupdir %>
 ROTATE=<%= [ Integer(@backuprotate) - 1, 0 ].max %>
 
@@ -31,12 +40,17 @@ cleanup()
 cleanup
 
 <% end -%>
-mysqldump -u${USER} -p${PASS} --opt --flush-logs --single-transaction \
- --all-databases <% if @backupcompress %>| bzcat -zc <% end %>> ${DIR}/${PREFIX}`date +%Y%m%d-%H%M%S`.sql<% if @backupcompress %>.bz2<% end  %>
+
+databases=`$MYSQL -s -e "SHOW DATABASES;" | sed -e 1d`
+
+for dbname in $databases; do
+ outfile=${DIR}/${PREFIX}${dbname}`date +%Y%m%d-%H%M%S`.sql<% if @backupcompress %>.bz2<% end  %>
+ $MYSQLDUMP $dbname <% if @backupcompress %>| bzcat -zc <% end %>> $outfile
+ chmod 700 $outfile
+done
 
 <% unless @delete_before_dump -%>
 if [ $? -eq 0 ] ; then
     cleanup
 fi
 <% end -%>
-

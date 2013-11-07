@@ -3,6 +3,7 @@
 # This module handles ...
 #
 # Parameters:
+#   [*defaults*]       - The path to the file containing the defaults.
 #   [*backupuser*]     - The name of the mysql backup user.
 #   [*backuppassword*] - The password of the mysql backup user.
 #   [*backupdir*]      - The target directory of the mysqldump.
@@ -26,25 +27,37 @@
 #   }
 #
 class mysql::backup (
-  $backupuser,
-  $backuppassword,
   $backupdir,
+  $defaults       = 'UNSET',
+  $backupuser     = 'UNSET',
+  $backuppassword = 'UNSET',
   $backupcompress = true,
   $backuprotate = 30,
   $delete_before_dump = false,
   $ensure = 'present'
 ) {
 
-  database_user { "${backupuser}@localhost":
-    ensure        => $ensure,
-    password_hash => mysql_password($backuppassword),
-    provider      => 'mysql',
-    require       => Class['mysql::config'],
+  $defaults_provided = $backupdir != 'UNSET';
+  $user_provided = $backupuser != 'UNSET' and $backuppassword != 'UNSET';
+
+
+  if (!$defaults_provided and !$user_provided) {
+    fail("Either provided a path to a defaults file or a username and password");
   }
 
-  database_grant { "${backupuser}@localhost":
-    privileges => [ 'Select_priv', 'Reload_priv', 'Lock_tables_priv', 'Show_view_priv' ],
-    require    => Database_user["${backupuser}@localhost"],
+
+  if ($user_provided) {
+    database_user { "${backupuser}@localhost":
+      ensure        => $ensure,
+      password_hash => mysql_password($backuppassword),
+      provider      => 'mysql',
+      require       => Class['mysql::config'],
+    }
+
+    database_grant { "${backupuser}@localhost":
+      privileges => [ 'Select_priv', 'Reload_priv', 'Lock_tables_priv', 'Show_view_priv' ],
+      require    => Database_user["${backupuser}@localhost"],
+    }
   }
 
   cron { 'mysql-backup':
